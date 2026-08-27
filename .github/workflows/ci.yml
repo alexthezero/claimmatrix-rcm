@@ -21,6 +21,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Check public demo JavaScript
+        run: node --check pages.js
       - name: Test
         run: npm test
       - name: Build
