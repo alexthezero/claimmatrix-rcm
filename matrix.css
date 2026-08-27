@@ -1,0 +1,145 @@
+/* Coding matrix polish: deterministic desktop geometry, cleaner rhythm, preserved mobile cards. */
+@media (min-width: 761px) {
+  .matrix-panel .tablewrap {
+    overflow-x: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .matrix-panel .matrix {
+    table-layout: fixed;
+    min-width: 900px;
+  }
+
+  .matrix-panel .matrix th,
+  .matrix-panel .matrix td {
+    box-sizing: border-box;
+  }
+
+  .matrix-panel .matrix th:nth-child(1),
+  .matrix-panel .matrix td:nth-child(1) { width: 42px; text-align: center; }
+
+  .matrix-panel .matrix th:nth-child(2),
+  .matrix-panel .matrix td:nth-child(2) { width: 18%; }
+
+  .matrix-panel .matrix th:nth-child(3),
+  .matrix-panel .matrix td:nth-child(3),
+  .matrix-panel .matrix th:nth-child(4),
+  .matrix-panel .matrix td:nth-child(4) { width: 72px; text-align: center; }
+
+  .matrix-panel .matrix th:nth-child(5),
+  .matrix-panel .matrix td:nth-child(5) { width: 76px; text-align: center; }
+
+  .matrix-panel .matrix th:nth-child(6),
+  .matrix-panel .matrix td:nth-child(6) { width: 94px; }
+
+  .matrix-panel .matrix th:nth-child(7),
+  .matrix-panel .matrix td:nth-child(7) { width: 132px; }
+
+  .matrix-panel .matrix th:nth-child(8),
+  .matrix-panel .matrix td:nth-child(8) { width: 116px; text-align: center; }
+
+  .matrix-panel .matrix th:nth-child(9),
+  .matrix-panel .matrix td:nth-child(9) { width: 50px; text-align: center; }
+
+  .matrix-panel .matrix th {
+    height: 42px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .matrix-panel .matrix td {
+    height: 56px;
+    padding: 8px 7px;
+  }
+
+  .matrix-panel .matrix td:nth-child(3) .cell,
+  .matrix-panel .matrix td:nth-child(4) .cell,
+  .matrix-panel .matrix td:nth-child(5) .cell,
+  .matrix-panel .matrix td:nth-child(6) .cell {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .matrix-panel .matrix .code {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .matrix-panel .matrix .money {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 14px minmax(0,1fr);
+    gap: 4px;
+    align-items: center;
+  }
+
+  .matrix-panel .matrix .money span {
+    margin: 0;
+    text-align: center;
+  }
+
+  .matrix-panel .matrix .money .cell {
+    min-width: 0;
+  }
+
+  .matrix-panel .matrix .status {
+    text-align: center;
+  }
+
+  .matrix-panel .matrix .status > * {
+    margin-inline: auto;
+  }
+
+  .matrix-panel .matrix .remove {
+    margin-inline: auto;
+  }
+
+  .matrix-panel .matrix tr.service-row {
+    transition: background .15s ease, box-shadow .15s ease;
+  }
+
+  .matrix-panel .matrix tr.service-row:hover {
+    background: rgba(107,214,216,.025);
+    box-shadow: inset 3px 0 0 rgba(107,214,216,.28);
+  }
+
+  .matrix-panel .matrix tr.service-row.blockrow:hover {
+    background: linear-gradient(90deg,rgba(255,146,150,.065),rgba(255,146,150,.015) 72%);
+    box-shadow: inset 3px 0 0 rgba(255,146,150,.6);
+  }
+
+  .matrix-panel .matrix tr.service-row.warnrow:hover {
+    background: linear-gradient(90deg,rgba(239,196,109,.055),rgba(239,196,109,.01) 72%);
+    box-shadow: inset 3px 0 0 rgba(239,196,109,.55);
+  }
+
+  .matrix-panel .line-issue-row td {
+    height: auto;
+    padding: 0 14px 11px 48px;
+  }
+
+  .matrix-panel .matrixfoot {
+    background: rgba(8,20,29,.42);
+  }
+}
+
+@media (max-width: 760px) {
+  .matrix-panel .matrix,
+  .matrix-panel .matrix th,
+  .matrix-panel .matrix td {
+    table-layout: auto;
+    width: auto;
+  }
+
+  .matrix-panel .matrix tr.service-row td {
+    height: auto;
+    text-align: left;
+  }
+
+  .matrix-panel .matrix tr.service-row td[data-label="Status"] {
+    text-align: left;
+  }
+}
