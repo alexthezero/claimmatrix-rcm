@@ -1,1 +1,176 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0d1520"><meta name="description" content="ClaimMatrix RCM prototype — continuous pre-submission claim validation and denial prevention workflow."><title>ClaimMatrix RCM</title><link rel="stylesheet" href="pages.css"></head><body><header class="topbar"><div class="brand"><div class="brandmark">CM</div><div><h1>ClaimMatrix <span>RCM</span></h1><p>Preventable-denial interception before submission</p></div></div><div class="prototype">PROTOTYPE · SYNTHETIC DATA ONLY</div></header><main class="workspace"><section><div class="toolbar"><div><div class="eyebrow">QUICK BILL</div><h2>Build the claim once. Catch errors while you type.</h2></div><div class="actions"><button class="btn secondary" id="loadDemo">Load problem demo</button><button class="btn ghost" id="reset">Reset</button></div></div><section class="panel"><div class="panelhead"><div><div class="eyebrow">CLAIM CONTEXT</div><h3>Patient, payer & routing</h3></div><div class="claimtoggle"><button class="claimtype active">Professional</button><button class="claimtype">Institutional</button></div></div><div class="formgrid"><label class="field span2"><span>Payer</span><input class="live" id="payer" placeholder="Search or enter payer"></label><label class="field"><span>Member ID</span><input class="live" id="member" placeholder="Member / subscriber ID"></label><label class="field"><span>Date of service</span><input class="live" id="dos" type="date"></label><label class="field"><span>First name</span><input class="live" id="first" placeholder="First"></label><label class="field"><span>Last name</span><input class="live" id="last" placeholder="Last"></label><label class="field"><span>Date of birth</span><input class="live" id="dob" type="date"></label><label class="field"><span>POS</span><input class="live" id="pos" maxlength="2" value="11"></label><label class="field span2"><span>Billing NPI</span><input class="live" id="npi" maxlength="10" inputmode="numeric" placeholder="10-digit NPI"></label></div></section><section class="panel"><div class="panelhead"><div><div class="eyebrow">DIAGNOSIS MATRIX</div><h3>Diagnosis pointers</h3></div></div><div class="diaggrid"><label class="diag"><span class="dnum">1</span><input class="live dxcode" placeholder="ICD-10-CM"></label><label class="diag"><span class="dnum">2</span><input class="live dxcode" placeholder="ICD-10-CM"></label><label class="diag"><span class="dnum">3</span><input class="live dxcode" placeholder="ICD-10-CM"></label><label class="diag"><span class="dnum">4</span><input class="live dxcode" placeholder="ICD-10-CM"></label></div></section><section class="panel"><div class="panelhead"><div><div class="eyebrow">CODING MATRIX</div><h3>Service lines</h3></div><button class="btn secondary" id="addLine">+ Add line</button></div><div class="tablewrap"><table class="matrix"><thead><tr><th>#</th><th>Procedure</th><th>Mod 1</th><th>Mod 2</th><th>Units</th><th>Dx ptr</th><th>Charge</th><th>Status</th><th></th></tr></thead><tbody id="lineBody"></tbody></table></div><div class="matrixfoot"><span id="lineCount">1 service line</span><strong>Total charges: <span id="total">$0.00</span></strong></div></section></section><aside><div class="sticky"><section class="scorecard"><div class="scoretop"><div><div class="eyebrow">LIVE PREFLIGHT</div><h3>Claim readiness</h3></div><div class="ring" id="ring"><strong id="score">0</strong><span>/100</span></div></div><div class="metrics"><div><strong id="bc">0</strong><span>Blockers</span></div><div><strong id="wc">0</strong><span>Warnings</span></div><div><strong id="ic">0</strong><span>Info</span></div></div><div class="state blocked" id="state"><span class="dot"></span>Submission locked</div><button class="btn primary submit" id="submit">Resolve blockers</button><p class="message" id="message">Live structural checks are active. Nothing is transmitted.</p><p class="note">This public demo does not persist claim data. Do not enter real PHI. TEST1–TEST5 are synthetic examples only.</p></section><section class="edits"><div class="editshead"><h3>Edits</h3><span id="editCount">0</span></div><div class="editlist" id="editList"></div></section></div></aside></main><footer class="footer">ClaimMatrix RCM v0.1 · Development prototype · No licensed CPT dataset or X12 implementation-guide content is bundled.</footer><script src="pages.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1219">
+  <meta name="description" content="ClaimMatrix RCM prototype — a faster, clearer pre-submission claims workflow.">
+  <title>ClaimMatrix RCM</title>
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandmark" aria-hidden="true">CM</div>
+      <div class="brandcopy">
+        <h1>ClaimMatrix <span>RCM</span></h1>
+        <p>Quick Bill + preventable-denial interception</p>
+      </div>
+    </div>
+    <div class="topactions">
+      <span class="workspace-label">Quick Bill</span>
+      <button class="btn ghost compact" id="reset" type="button">New claim</button>
+    </div>
+  </header>
+
+  <div class="safetybar" role="note">
+    <strong>PUBLIC PROTOTYPE</strong>
+    <span>Synthetic data only. Do not enter real PHI. Nothing is saved or transmitted.</span>
+  </div>
+
+  <main class="workspace">
+    <section class="bill-column" aria-label="Quick Bill claim editor">
+      <div class="hero-row">
+        <div>
+          <div class="eyebrow">QUICK BILL</div>
+          <h2>Build the claim. Fix issues where they happen.</h2>
+          <p class="lede">ClaimMatrix validates the draft continuously, but only escalates missing information after you touch a field or run Review Claim.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="btn secondary" id="loadDemo" type="button">Load problem demo</button>
+          <button class="btn primary" id="reviewTop" type="button">Review claim</button>
+        </div>
+      </div>
+
+      <nav class="progress-strip" aria-label="Claim completion">
+        <button class="progress-step active" data-scroll="contextPanel" type="button"><span>1</span><div><strong>Claim</strong><small id="contextProgress">Not started</small></div></button>
+        <button class="progress-step" data-scroll="diagnosisPanel" type="button"><span>2</span><div><strong>Diagnosis</strong><small id="diagnosisProgress">Not started</small></div></button>
+        <button class="progress-step" data-scroll="servicePanel" type="button"><span>3</span><div><strong>Services</strong><small id="serviceProgress">1 incomplete line</small></div></button>
+      </nav>
+
+      <section class="panel" id="contextPanel">
+        <div class="panelhead">
+          <div>
+            <div class="eyebrow">CLAIM CONTEXT</div>
+            <h3>Patient, payer & routing</h3>
+          </div>
+          <div class="claimtoggle" aria-label="Claim type">
+            <button class="active" type="button" aria-pressed="true">Professional</button>
+            <button class="disabled-mode" type="button" disabled title="Institutional billing requires a separate 837I / UB-04 workflow">Institutional <small>Coming soon</small></button>
+          </div>
+        </div>
+        <div class="formgrid">
+          <label class="field span2" data-field="payer">
+            <span class="fieldlabel">Payer <em>Required</em></span>
+            <input class="live" id="payer" placeholder="Search or enter payer" autocomplete="off">
+            <small class="fieldhelp">Payer routing profiles will eventually drive payer-specific edits.</small>
+          </label>
+          <label class="field" data-field="member">
+            <span class="fieldlabel">Member ID <em>Required</em></span>
+            <input class="live" id="member" placeholder="Member / subscriber ID" autocomplete="off">
+          </label>
+          <label class="field" data-field="dos">
+            <span class="fieldlabel">Date of service <em>Required</em></span>
+            <input class="live" id="dos" type="date">
+          </label>
+          <label class="field" data-field="first">
+            <span class="fieldlabel">First name <em>Required</em></span>
+            <input class="live" id="first" placeholder="First" autocomplete="off">
+          </label>
+          <label class="field" data-field="last">
+            <span class="fieldlabel">Last name <em>Required</em></span>
+            <input class="live" id="last" placeholder="Last" autocomplete="off">
+          </label>
+          <label class="field" data-field="dob">
+            <span class="fieldlabel">Date of birth <em>Required</em></span>
+            <input class="live" id="dob" type="date">
+          </label>
+          <label class="field" data-field="pos">
+            <span class="fieldlabel">Place of service <em>Required</em></span>
+            <input class="live" id="pos" maxlength="2" inputmode="numeric" placeholder="e.g. 11" autocomplete="off">
+          </label>
+          <label class="field span2" data-field="npi">
+            <span class="fieldlabel">Billing NPI <em>Required</em></span>
+            <input class="live" id="npi" maxlength="10" inputmode="numeric" placeholder="10-digit NPI" autocomplete="off">
+            <small class="fieldhelp">Prototype validates format and NPI check digit only.</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" id="diagnosisPanel">
+        <div class="panelhead">
+          <div>
+            <div class="eyebrow">DIAGNOSIS</div>
+            <h3>Diagnosis pointers</h3>
+          </div>
+          <span class="panelnote">Format screening only until the effective code-set adapter is connected.</span>
+        </div>
+        <div class="diaggrid">
+          <label class="diag" data-field="dx1"><span class="dnum">1</span><input class="live dxcode" placeholder="ICD-10-CM" aria-label="Diagnosis 1"></label>
+          <label class="diag" data-field="dx2"><span class="dnum">2</span><input class="live dxcode" placeholder="ICD-10-CM" aria-label="Diagnosis 2"></label>
+          <label class="diag" data-field="dx3"><span class="dnum">3</span><input class="live dxcode" placeholder="ICD-10-CM" aria-label="Diagnosis 3"></label>
+          <label class="diag" data-field="dx4"><span class="dnum">4</span><input class="live dxcode" placeholder="ICD-10-CM" aria-label="Diagnosis 4"></label>
+        </div>
+      </section>
+
+      <section class="panel matrix-panel" id="servicePanel">
+        <div class="panelhead matrix-head">
+          <div>
+            <div class="eyebrow">CODING MATRIX</div>
+            <h3>Service lines</h3>
+          </div>
+          <div class="matrix-actions">
+            <span class="keyboard-hint">Alt+N adds a line</span>
+            <button class="btn secondary" id="addLine" type="button">+ Add line</button>
+          </div>
+        </div>
+        <div class="tablewrap">
+          <table class="matrix">
+            <thead>
+              <tr><th>#</th><th>Procedure</th><th>Mod 1</th><th>Mod 2</th><th>Units</th><th>Dx ptr</th><th>Charge</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="lineBody"></tbody>
+          </table>
+        </div>
+        <div class="matrixfoot"><span id="lineCount">1 service line</span><strong>Total charges <span id="total">$0.00</span></strong></div>
+      </section>
+    </section>
+
+    <aside class="intelligence-column" aria-label="Claim intelligence">
+      <div class="sticky">
+        <section class="claim-state-card" id="claimStateCard">
+          <div class="state-kicker">CLAIM INTELLIGENCE</div>
+          <div class="state-hero">
+            <div class="state-icon neutral" id="stateIcon" aria-hidden="true">•</div>
+            <div><h3 id="stateTitle">Incomplete</h3><p id="stateSubtitle">Start entering the claim. Missing untouched fields stay neutral.</p></div>
+          </div>
+          <div class="metrics">
+            <div><strong id="bc">0</strong><span>Must fix</span></div>
+            <div><strong id="wc">0</strong><span>Review</span></div>
+            <div><strong id="ic">0</strong><span>Info</span></div>
+          </div>
+          <button class="btn primary review-button" id="review" type="button">Review claim</button>
+          <p class="message" id="message" aria-live="polite">No claim data has been transmitted.</p>
+        </section>
+
+        <section class="edits">
+          <div class="editshead">
+            <div><h3>What needs attention</h3><p>Click an item to jump to the exact field or service line.</p></div>
+            <span id="editCount">0</span>
+          </div>
+          <div class="editlist" id="editList" aria-live="polite"></div>
+        </section>
+
+        <section class="trust-card">
+          <strong>Rule transparency</strong>
+          <p>ClaimMatrix keeps structural checks, authoritative policy, and predictive denial risk visibly separate.</p>
+          <span>TEST1–TEST5 = synthetic demo rules only</span>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">ClaimMatrix RCM v0.2 · Development prototype · No licensed CPT dataset or X12 implementation-guide content is bundled.</footer>
+  <script src="pages.js"></script>
+</body>
+</html>
