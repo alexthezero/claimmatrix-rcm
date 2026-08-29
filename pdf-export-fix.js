@@ -30,6 +30,17 @@
       .toLowerCase()||'claim';
   }
 
+  function waitForImages(doc){
+    const images=[...doc.images];
+    return Promise.all(images.map(img=>{
+      if(img.complete)return Promise.resolve();
+      return new Promise(resolve=>{
+        img.addEventListener('load',resolve,{once:true});
+        img.addEventListener('error',resolve,{once:true});
+      });
+    }));
+  }
+
   function enhancePreview(previewWindow){
     try{
       const doc=previewWindow.document;
@@ -48,7 +59,7 @@
 
       const status=doc.createElement('span');
       status.id='pdfStatus';
-      status.style.cssText='font:600 12px/1.4 system-ui,sans-serif;color:#334155;margin-left:8px;';
+      status.style.cssText='font:600 12px/1.4 system-ui,sans-serif;color:#d9e4ea;margin-left:8px;';
       status.setAttribute('aria-live','polite');
 
       if(printButton)toolbar.insertBefore(downloadButton,printButton);
@@ -56,7 +67,7 @@
       toolbar.appendChild(status);
 
       const style=doc.createElement('style');
-      style.textContent='@media print{#downloadPdf,#pdfStatus{display:none!important}} .page{break-after:page;page-break-after:always}.page:last-child{break-after:auto;page-break-after:auto}';
+      style.textContent='@media print{#downloadPdf,#pdfStatus{display:none!important}} .page{break-after:page;page-break-after:always}.page:last-child{break-after:auto;page-break-after:auto}.pdf-exporting .pages{padding:0!important}.pdf-exporting .page{margin:0!important;box-shadow:none!important}';
       doc.head.appendChild(style);
 
       downloadButton.addEventListener('click',async()=>{
@@ -64,30 +75,35 @@
         downloadButton.disabled=true;
         downloadButton.textContent='Generating PDF…';
         status.textContent='Preparing claim PDF…';
+        const exactForm=Boolean(doc.querySelector('.actual-cms1500'));
         try{
           const html2pdf=await loadPdfEngine(previewWindow);
+          await waitForImages(doc);
+          if(doc.fonts?.ready)await doc.fonts.ready;
           const base=safeFilename(doc.title);
           const stamp=new Date().toISOString().slice(0,10);
           const filename=`${base}-${stamp}.pdf`;
 
+          if(exactForm)doc.body.classList.add('pdf-exporting');
           const worker=html2pdf()
             .set({
-              margin:[0.18,0.18,0.18,0.18],
+              margin:exactForm?0:[0.18,0.18,0.18,0.18],
               filename,
-              image:{type:'jpeg',quality:0.98},
-              html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},
+              image:{type:'jpeg',quality:0.99},
+              html2canvas:{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0},
               jsPDF:{unit:'in',format:'letter',orientation:'portrait',compress:true},
               pagebreak:{mode:['css','legacy'],avoid:['tr','.field-block']}
             })
             .from(pages);
 
           await worker.save();
-          status.textContent='PDF generated.';
+          status.textContent=exactForm?'Exact letter-size CMS-1500 PDF generated.':'PDF generated.';
         }catch(error){
           console.error('ClaimMatrix PDF export failed',error);
           status.textContent='PDF generation failed. Use Print as a fallback.';
           try{previewWindow.alert('ClaimMatrix could not generate the PDF file. Please try again, or use Print as a fallback.');}catch(_){/* no-op */}
         }finally{
+          doc.body.classList.remove('pdf-exporting');
           downloadButton.disabled=false;
           downloadButton.textContent='Download PDF';
         }
