@@ -26,6 +26,7 @@ jobs:
           node --check pages.js
           node --check claim-forms.js
           node --check pdf-export-fix.js
+          node --check official-forms.js
       - name: Test
         run: npm test
       - name: Build
