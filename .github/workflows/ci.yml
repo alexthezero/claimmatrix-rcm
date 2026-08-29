@@ -27,6 +27,7 @@ jobs:
           node --check claim-forms.js
           node --check pdf-export-fix.js
           node --check official-forms.js
+          grep -q '<script src="official-forms.js"></script>' index.html
       - name: Test
         run: npm test
       - name: Build
